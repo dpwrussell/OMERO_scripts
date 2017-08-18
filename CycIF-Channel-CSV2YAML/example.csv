@@ -1,0 +1,25 @@
+Cycle,Channel,Layer,Marker,Cycle Color,Failed,Immunotype,Immunoncology,Tissue architecture,Cycle_DNA,Autofluorescence
+0,0,1,DNA,NA,TRUE,,,,Red,
+0,1,2,bleached,Yellow,TRUE,,,,,Red
+0,2,3,bleached,Cyan,,,,,,Green
+0,3,4,bleached,Magenta,,,,,,Blue
+1,0,5,DNA,Yellow,,,,,Yellow,
+1,1,6,CD3,White,,White,,,,
+1,2,7,p-Rb,Orange,,,,Orange,,
+1,3,8,CD8,Red,,Red,,,,
+2,0,9,DNA,Green,,,,,Green,
+2,1,10,PD1,Red,,,Red,,,
+2,2,11,PDL1,Green,,,Green,,,
+2,3,12,SMA,White,,,,White,,
+3,0,13,DNA,Cyan,,,,,Cyan,
+3,1,14,CD69,Cyan,,,Cyan,,,
+3,2,15,CD45R (B220),Cyan,,Cyan,,,,
+3,3,16,CD25,Yellow,,Yellow,,,,
+4,0,17,DNA,Blue,,,,,Blue,
+4,1,18,FoxP3,Yellow,,,Yellow,,,
+4,2,19,CD4,Green,,Green,,,,
+4,3,20,CD45,Magenta,,Magenta,,,,
+5,0,21,DNA,Magenta,,,,,Magenta,
+5,1,22,CD123,Green,,,,Green,,
+5,2,23,CD86,Magenta,,,,Magenta,,
+5,3,24,FoxP3,Magenta,,,Magenta,,,
