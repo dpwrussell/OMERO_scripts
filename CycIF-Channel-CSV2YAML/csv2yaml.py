@@ -17,6 +17,19 @@ def eprint(*args, **kwargs):
     exit(1)
 
 
+def get_color(row, column):
+    value = row[column].strip()
+
+    if len(value) == 0:
+        return None
+
+    # TODO Does it make sense to have an NA in a group?
+    if value.upper() == 'NA':
+        return None
+
+    return Color(value)
+
+
 def get_cycle_color(row):
     value = row['Cycle Color'].strip()
 
@@ -29,6 +42,7 @@ def get_cycle_color(row):
     return Color(value)
 
 
+# TODO Allow cycle names with spaces in?
 def get_cycle_name(row):
     value = row['Marker'].strip()
 
@@ -36,6 +50,10 @@ def get_cycle_name(row):
         value += '-failed'
 
     return value
+
+
+custom_dumper = yaml.dumper.SafeDumper
+custom_dumper.ignore_aliases = lambda self, data: True
 
 
 def color_representer(dumper, data):
@@ -54,8 +72,8 @@ def Ystr_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='\'')
 
 
-yaml.add_representer(Color, color_representer)
-yaml.add_representer(Ystr, Ystr_representer)
+yaml.add_representer(Color, color_representer, Dumper=custom_dumper)
+yaml.add_representer(Ystr, Ystr_representer, Dumper=custom_dumper)
 
 if __name__ == '__main__':
 
@@ -77,33 +95,65 @@ if __name__ == '__main__':
                 MANDATORY_COLS
             ))
 
-        channel_groups = reader.fieldnames[MANDATORY_COL_COUNT:]
+        channel_group_names = reader.fieldnames[MANDATORY_COL_COUNT:]
 
         # Ensure all of the channel groupings have names
-        if not all(len(name.strip()) > 0 for name in channel_groups):
+        if not all(len(name.strip()) > 0 for name in channel_group_names):
             eprint('All columns must have a name for the channel grouping'
                    'title.')
 
         # Ensure there are no repeated channel grouping names
-        # TODO Also ensure that no groups collide with cycle groupings
-        if len(set(channel_groups)) != len(channel_groups):
+        # TODO Also ensure that no groups collide with cycle groupings?
+        # Or override? Or skip?
+        if len(set(channel_group_names)) != len(channel_group_names):
             eprint('Channel grouping titles must be unique')
 
         channels = {}
+        channel_groups = {}
         for row in reader:
             default_color = get_cycle_color(row)
-            # color = get_color(row, channel_groups)
+            channel_id = int(row['Layer'])
+
             if default_color:
-                channels[int(row['Layer'])] = {
+                channels[channel_id] = {
                     'label': Ystr(get_cycle_name(row)),
                     'min': 0,
                     'max': 65536,
                     'color': default_color
                 }
 
+                channel_group = channel_groups.setdefault(
+                    'Cycle_{}'.format(channel_id), []
+                )
+
+                channel_group.append({
+                    'channel': 1,
+                    'min': 0,
+                    'max': 65536,
+                    'color': default_color
+                })
+
+            for channel_group_name in channel_group_names:
+                color = get_color(row, channel_group_name)
+
+                if color:
+
+                    channel_group = channel_groups.setdefault(
+                        channel_group_name, []
+                    )
+
+                    channel_group.append({
+                        'channel': channel_id,
+                        'min': 0,
+                        'max': 65536,
+                        'color': color,
+                    })
+
         data = {
-            'channels': channels
+            'channels': channels,
+            'channelGroups': channel_groups
         }
 
         with open(args.outfile, 'wb') as outfile:
-            yaml.dump(data, outfile, default_flow_style=False)
+            yaml.dump(data, outfile, default_flow_style=False,
+                      Dumper=custom_dumper)
