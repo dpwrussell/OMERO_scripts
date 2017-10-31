@@ -57,7 +57,8 @@ def Ystr_representer(dumper, data):
 yaml.add_representer(Color, color_representer)
 yaml.add_representer(Ystr, Ystr_representer)
 
-if __name__ == '__main__':
+
+def main(argv=sys.argv):
 
     parser = argparse.ArgumentParser(
         description='Convert HMS CycIF channel mapping CSV file to YAML.'
@@ -107,3 +108,7 @@ if __name__ == '__main__':
 
         with open(args.outfile, 'wb') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
+
+
+if __name__ == '__main__':
+    main()
